@@ -32,7 +32,8 @@
 				deselectOnClick: false,
 				// slideshow behavior options:
 				interval: 2500,
-				interactive: true
+				interactive: true,
+				interaction: "hover"
 			};
 			var o = $.extend(defaults, opts);
 
@@ -449,11 +450,36 @@
 		var self = this,
 			opts = self.opts;
 
-		this.addEventHandler(this.$container, 'mouseleave', function() {
+		if (opts.interaction == "hover") {
+
+			this.addEventHandler(this.$container, "mouseleave", function() {
+				self.$container.kwicks('expand', -1, { delay: opts.delayMouseOut });
+			});
+
+			this.addEventHandler(this.$panels, "mouseenter", function() {
+				$(this).kwicks('expand', { delay: opts.delayMouseIn });
+			});
+
+			if (!opts.selectOnClick && !opts.deselectOnClick) return;
+
+			this.addEventHandler(this.$panels, 'click', function() {
+				var $this = $(this),
+					isSelected = $this.hasClass('kwicks-selected');
+
+				if (isSelected && opts.deselectOnClick) {
+					$this.parent().kwicks('select', -1);
+				} else if (!isSelected && opts.selectOnClick) {
+					$this.kwicks('select');
+				}
+			});
+
+		} else if (opts.interaction == "click") {
+
+			this.addEventHandler(this.$container, "click", function() {
 			self.$container.kwicks('expand', -1, { delay: opts.delayMouseOut });
 		});
 
-		this.addEventHandler(this.$panels, 'mouseenter', function() {
+		this.addEventHandler(this.$panels, "click", function() {
 			$(this).kwicks('expand', { delay: opts.delayMouseIn });
 		});
 
@@ -469,6 +495,8 @@
 				$this.kwicks('select');
 			}
 		});
+
+		}
 	};
 
 	/**
